@@ -3,24 +3,12 @@ import { Message } from "../types";
 import { MODEL_NAME } from "../components/constants";
 import { vectorSearchKnowledgeBase } from "../utils/search";
 
-// Resolve API key from multiple sources (Vite define, import.meta.env, process.env)
-const resolveApiKey = (): string => {
-  // @ts-ignore - injected by Vite define
-  if (typeof __GEMINI_API_KEY__ !== 'undefined' && __GEMINI_API_KEY__) return __GEMINI_API_KEY__;
-  // @ts-ignore
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) return import.meta.env.VITE_GEMINI_API_KEY;
-  if (typeof process !== 'undefined' && process.env?.API_KEY) return process.env.API_KEY;
-  if (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
-  return '';
-};
+// API key injected at build time by Vite (VITE_ prefix exposes it to client)
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
 
 // Initialize the GenAI Client using the GoogleGenAI class
 const getAIClient = () => {
-  const apiKey = resolveApiKey();
-  if (!apiKey) {
-    console.error('No Gemini API key found. Set VITE_GEMINI_API_KEY or GEMINI_API_KEY.');
-  }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({ apiKey: GEMINI_KEY });
 };
 
 /**
